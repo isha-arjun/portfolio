@@ -314,7 +314,7 @@ footer { border-top:1px solid var(--line); padding:25px 0 38px; color:#8f93a7; f
       <div class="section-head"><div><div class="kicker">05 / Open to thoughtful collaboration</div><h2>Have something<br>worth building?</h2></div><p class="section-intro">I’m interested in thoughtful conversations with people who enjoy solving hard problems and making ambitious ideas real.</p></div>
       <div class="panel contact-panel">
         <div class="contact-copy"><h3 style="font-size:20px;letter-spacing:-.04em">Let's make an interesting thing happen.</h3><p>Share what you're exploring, what you'd like to build together, or what caught your attention. Relevant areas include AI, software, creative technology, research and early-stage product ideas.</p><a class="button ghost" href="https://github.com/isha-arjun" target="_blank" rel="noreferrer">Explore my GitHub ↗</a><p style="margin-top:20px">Prefer email? <a href="mailto:isha.arjun28@gmail.com" style="color:#d7d0ff">isha.arjun28@gmail.com</a></p></div>
-        <form class="contact-form" id="contactForm"><input class="field" name="name" placeholder="Your name" autocomplete="name" required><input class="field" name="email" type="email" placeholder="Your email" autocomplete="email" required><select class="field" name="topic" required><option value="" disabled selected>What would you like to discuss?</option><option>AI / software collaboration</option><option>Game development / creative technology</option><option>Research / experimentation</option><option>Startup / product idea</option><option>Something else</option></select><textarea class="field" name="message" placeholder="Tell me a little about your idea..." required></textarea><button class="button primary" type="submit">Prepare email ↗</button><div class="form-result" id="formResult" role="status">Your email draft is ready in your email app. Review it before sending.</div><div class="form-note">This form prepares an email in your own email app. It does not send or store your message on this website.</div></form>
+        <form class="contact-form" id="contactForm" action="https://formspree.io/f/myeevdeg" method="POST"><input class="field" name="name" placeholder="Your name" autocomplete="name" required><input class="field" name="email" type="email" placeholder="Your email" autocomplete="email" required><select class="field" name="topic" required><option value="" disabled selected>What would you like to discuss?</option><option>AI / software collaboration</option><option>Game development / creative technology</option><option>Research / experimentation</option><option>Startup / product idea</option><option>Something else</option></select><textarea class="field" name="message" placeholder="Tell me a little about your idea..." required></textarea><button class="button primary" type="submit">Send enquiry ↗</button><div class="form-result" id="formResult" role="status"></div><div class="form-note">Your message will be sent securely through Formspree. Please don’t include sensitive personal information.</div></form>
       </div>
     </section>
   </main>
@@ -367,16 +367,36 @@ document.getElementById('year').textContent = new Date().getFullYear();
 const contactForm=document.getElementById('contactForm');
 const formResult=document.getElementById('formResult');
 const submitButton=contactForm.querySelector('button[type="submit"]');
-contactForm.addEventListener('submit',(event)=>{
+const defaultSubmitLabel=submitButton.textContent;
+contactForm.addEventListener('submit',async(event)=>{
   event.preventDefault();
   if(!contactForm.reportValidity())return;
   formResult.style.display='block';
-  formResult.style.color='#f1c98a';
-  formResult.textContent='The enquiry form is not connected to a message receiver yet. Your message has not been sent. Please use the email link on this page instead.';
-  formResult.setAttribute('role','alert');
+  formResult.style.color='#a5d9cf';
+  formResult.textContent='Sending your enquiry…';
   submitButton.disabled=true;
-  submitButton.textContent='Form not connected';
-  submitButton.title='No form endpoint is configured, so this message cannot be submitted yet.';
+  submitButton.textContent='Sending…';
+  try{
+    const response=await fetch(contactForm.action,{
+      method:'POST',
+      body:new FormData(contactForm),
+      headers:{'Accept':'application/json'}
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok){
+      const details=Array.isArray(result.errors)?result.errors.map(error=>error.message).join(' '):'Please check the form and try again.';
+      throw new Error(details||'The message could not be submitted.');
+    }
+    formResult.style.color='#a5d9cf';
+    formResult.textContent='Thanks! Your enquiry has been submitted successfully.';
+    contactForm.reset();
+  }catch(error){
+    formResult.style.color='#f1c98a';
+    formResult.textContent=error.message||'Something went wrong. Please try again in a moment.';
+  }finally{
+    submitButton.disabled=false;
+    submitButton.textContent=defaultSubmitLabel;
+  }
 });
 // Audio is intentionally off. The control is a clear placeholder until an original, licensed ambient track is supplied.
 document.getElementById('soundToggle').addEventListener('click',()=>{
