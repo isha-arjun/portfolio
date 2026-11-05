@@ -364,14 +364,19 @@ const glow=document.getElementById('ambientGlow');
 if(window.matchMedia('(pointer:fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){ window.addEventListener('pointermove',(event)=>{ glow.style.left=event.clientX+'px'; glow.style.top=event.clientY+'px'; },{passive:true}); }
 if(window.matchMedia('(pointer:fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){ document.querySelectorAll('.project-card').forEach(card=>{ card.addEventListener('pointermove',(event)=>{ const rect=card.getBoundingClientRect(); const x=(event.clientX-rect.left)/rect.width-.5; const y=(event.clientY-rect.top)/rect.height-.5; card.style.setProperty('--tilt-x',(x*3)+'deg'); card.style.setProperty('--tilt-y',(-y*3)+'deg'); }); card.addEventListener('pointerleave',()=>{ card.style.setProperty('--tilt-x','0deg'); card.style.setProperty('--tilt-y','0deg'); }); }); }
 document.getElementById('year').textContent = new Date().getFullYear();
-document.getElementById('contactForm').addEventListener('submit',(event)=>{
+const contactForm=document.getElementById('contactForm');
+const formResult=document.getElementById('formResult');
+const submitButton=contactForm.querySelector('button[type="submit"]');
+contactForm.addEventListener('submit',(event)=>{
   event.preventDefault();
-  const form = event.currentTarget;
-  const data = new FormData(form);
-  const subject = encodeURIComponent('Portfolio collaboration — '+data.get('topic'));
-  const body = encodeURIComponent('Name: '+data.get('name')+'\nEmail: '+data.get('email')+'\nTopic: '+data.get('topic')+'\n\n'+data.get('message'));
-  document.getElementById('formResult').style.display='block';
-  window.location.href = 'mailto:isha.arjun28@gmail.com?subject='+subject+'&body='+body;
+  if(!contactForm.reportValidity())return;
+  formResult.style.display='block';
+  formResult.style.color='#f1c98a';
+  formResult.textContent='The enquiry form is not connected to a message receiver yet. Your message has not been sent. Please use the email link on this page instead.';
+  formResult.setAttribute('role','alert');
+  submitButton.disabled=true;
+  submitButton.textContent='Form not connected';
+  submitButton.title='No form endpoint is configured, so this message cannot be submitted yet.';
 });
 // Audio is intentionally off. The control is a clear placeholder until an original, licensed ambient track is supplied.
 document.getElementById('soundToggle').addEventListener('click',()=>{
